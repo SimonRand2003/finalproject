@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "PhotoGalleryViewModel"
 
-class PhotoGalleryViewModel : ViewModel() {
-    private val photoRepository = PhotoRepository()
+class NasaGalleryViewModel : ViewModel() {
+    private val nasaRepository = NasaRepository()
 
     private val _galleryItems: MutableStateFlow<List<GalleryItem>> =
         MutableStateFlow(emptyList())
@@ -22,7 +22,14 @@ class PhotoGalleryViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             try {
-                val items = photoRepository.fetchPhotos()
+                val nasaResponses = nasaRepository.getAstronomyPicturesOfTheDay(count = 50)
+                val items = nasaResponses.mapIndexed { index, nasaResponse ->
+                    GalleryItem(
+                        title = "NASA Astronomy Picture of the Day $index",
+                        id = "apod_$index",
+                        url = nasaResponse.imageUrl
+                    )
+                }
                 Log.d(TAG, "Items received: $items")
                 _galleryItems.value = items
             } catch (ex: Exception) {
